@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Hanwool Kim" />
+
+<meta name="date" content="2016-12-29" />
+
+<title>Tools for Attribute VSI CUSUM Charts</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Tools for Attribute VSI CUSUM Charts</h1>
+<h4 class="author"><em>Hanwool Kim</em></h4>
+<h4 class="date"><em>2016-12-29</em></h4>
+
+
+
+<p>The package attrCUSUM has been developed to aid in the statistical design of attribute VSI CUSUM chart. It currently provides tools for monitoring of mean increase when the data are (zero inflated) Poisson/binomial distribution. These tools can be easily applied to other count processes and more complicated CUSUM control chart. We leave these issues as our perpetual work.</p>
+<p>This vignette briefly illustrates some examples for usage of functions in the package.</p>
+<div id="cusum-statistic" class="section level2">
+<h2>CUSUM statistic</h2>
+<p>Note that the considered CUSUM statistic for monitoring of mean increase is defined as follows:</p>
+<p><span class="math inline">\({C}_{0} = {c}_{0},\)</span></p>
+<p><span class="math inline">\({C}_{t} = \max \left( 0, {C}_{t-1}\right) + X_{t} - k, ~~ t \in \mathbf{N}\)</span>,</p>
+<p>wherein <span class="math inline">\(X_{t}\)</span> is a count process of interest, <span class="math inline">\(k\)</span> is the reference value and <span class="math inline">\(C_{0}\)</span> is the initial state.</p>
+</div>
+<div id="getting-ansss-atss-and-other-informations" class="section level2">
+<h2>Getting ANSSs, ATSs and other informations</h2>
+<p>First of all, the package should be attached.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(attrCUSUM)</code></pre></div>
+<p>Suppose that <span class="math inline">\(X_{i}\)</span> is distributed Poisson with mean <span class="math inline">\(\lambda\)</span>. The function <code>getAve_poisson</code> provides useful information on design of upper one-sided CUSUM control chart when the data are Poisson.</p>
+<p>Assume that we are interested in the average number of sample to signal (ANSS) an out-of-condition for CUSUM(k=5,h=8) with initial state 0 when the data are Poisson with mean 4 where k and h are the reference value and the (upper) control limit of CUSUM control chart respectively. Then the ANSS of CUSUM(k=5, h=8) chart can be obtained as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lambda &lt;-<span class="st">  </span><span class="dv">4</span>  <span class="co"># mean of Poisson distribution</span>
+k &lt;-<span class="st"> </span><span class="dv">5</span>  <span class="co"># reference value </span>
+h &lt;-<span class="st"> </span><span class="dv">8</span>  <span class="co"># control limit</span>
+c.zero &lt;-<span class="st"> </span><span class="dv">0</span>  <span class="co"># initial state</span>
+res &lt;-<span class="st"> </span><span class="kw">getAve_pois</span>(<span class="dt">lambda =</span> lambda, <span class="dt">refv =</span> k, <span class="dt">contl =</span> h, <span class="dt">c.zero =</span> c.zero)
+res$ANSS</code></pre></div>
+<pre><code>## [1] 171.7792</code></pre>
+<p>Next, Assume that we want to get the corresponding longer sampling time when the predetermined shorter sampling interval is 0.1 and the warning limit is -1. The results can be obtained as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lambda &lt;-<span class="st">  </span><span class="dv">4</span>  <span class="co"># mean of Poisson distribution</span>
+k &lt;-<span class="st"> </span><span class="dv">5</span>  <span class="co"># reference value </span>
+h &lt;-<span class="st"> </span><span class="dv">8</span>  <span class="co"># control limit</span>
+c.zero &lt;-<span class="st"> </span><span class="dv">0</span>  <span class="co"># initial state</span>
+warnl &lt;-<span class="st"> </span>-<span class="dv">1</span>  <span class="co"># warning limit</span>
+ds &lt;-<span class="st"> </span><span class="fl">0.1</span>  <span class="co"># shorter sampling interval</span>
+res1 &lt;-<span class="st"> </span><span class="kw">getAve_pois</span>(<span class="dt">lambda =</span> lambda, <span class="dt">refv =</span> k, <span class="dt">contl =</span> h, 
+                   <span class="dt">c.zero =</span> c.zero, <span class="dt">warnl =</span> warnl, <span class="dt">ds =</span> ds)
+dl &lt;-<span class="st"> </span>res1$dl  <span class="co"># longer sampling interval</span>
+dl</code></pre></div>
+<pre><code>## [1] 2.910912</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res2 &lt;-<span class="st"> </span><span class="kw">getAve_pois</span>(<span class="dt">lambda =</span> lambda, <span class="dt">refv =</span> k, <span class="dt">contl =</span> h, 
+                   <span class="dt">c.zero =</span> c.zero, <span class="dt">warnl =</span> warnl, <span class="dt">ds =</span> ds, <span class="dt">dl =</span> dl)
+res2$ANSS</code></pre></div>
+<pre><code>## [1] 171.7792</code></pre>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">res2$ATS</code></pre></div>
+<pre><code>## [1] 171.7792</code></pre>
+<p>The following is an example of ATS profiles. Evaluate <code>example(package = &quot;attrCUSUM&quot;, &quot;getAve_pois&quot;)</code> for more details. In plot, <span class="math inline">\(\delta\)</span> denotes mean shift in units of standard deviation. <img src="data:image/png;base64,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" style="display: block; margin: auto;" /></p>
+<p>Note that the function <code>getAve_pois</code> provides other useful information related to Markov chain approach. Refer to <code>help(getAve)</code> for more details.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">names</span>(res2)</code></pre></div>
+<pre><code>##  [1] &quot;endpoints&quot;       &quot;numsubI&quot;         &quot;lensubI&quot;        
+##  [4] &quot;Q&quot;               &quot;I_minus_Q&quot;       &quot;I_minus_Q_inv&quot;  
+##  [7] &quot;I_minus_Q_inv_1&quot; &quot;initpr&quot;          &quot;ds&quot;             
+## [10] &quot;dl&quot;              &quot;di&quot;              &quot;psi.s&quot;          
+## [13] &quot;psi.l&quot;           &quot;refv.act&quot;        &quot;contl.act&quot;      
+## [16] &quot;warnl.act&quot;       &quot;c.zero.act&quot;      &quot;ANSS&quot;           
+## [19] &quot;ATS&quot;</code></pre>
+</div>
+<div id="getting-suitable-control-limit" class="section level2">
+<h2>Getting suitable control limit</h2>
+<p>As was before, Assume that <span class="math inline">\(X_{i}\)</span> is distributed Poisson with mean <span class="math inline">\(\lambda\)</span>, also we want to get suitable control limit when the data are Poisson with mean 4 for that the reference value is 5, the initial state is 0 and the desired ANSS is near 200. Then, the suitable control limit can be obtained as follows:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">lambda &lt;-<span class="st">  </span><span class="dv">4</span>  <span class="co"># mean of Poisson distribution</span>
+k &lt;-<span class="st"> </span><span class="dv">5</span>  <span class="co"># reference value </span>
+c.zero &lt;-<span class="st"> </span><span class="dv">0</span>  <span class="co"># initial state</span>
+anss.target &lt;-<span class="st"> </span>200L  <span class="co"># desired anss</span>
+<span class="kw">getContl_pois</span>(<span class="dt">lambda =</span> lambda, <span class="dt">anss.target =</span> anss.target, 
+              <span class="dt">refv =</span> k, <span class="dt">c.zero =</span> c.zero)</code></pre></div>
+<pre><code>## $refv.act
+## [1] 5
+## 
+## $c.zero.act
+## [1] 0
+## 
+## $sol1
+##   contl1    ANSS1 
+##   8.0000 171.7792 
+## 
+## $sol2
+##   contl2    ANSS2 
+##   9.0000 270.0112</code></pre>
+</div>
+<div id="other-count-process" class="section level2">
+<h2>Other count process</h2>
+<p>Although we illustrated only the case that the data are Poisson, the package <code>attrCUSUM</code> also provides other count processes.</p>
+<ul>
+<li>For (zero-inflated) binomial VSI CUSUM chart, refer to <code>help(getAve_binomial)</code> and <code>help(getContl_binomial)</code>.</li>
+<li>For (zero-inflated) Poisson VSI CUSUM chart, refer to <code>help(getAve_Poisson)</code> and <code>help(getContl_Poisson)</code>.</li>
+<li>For user-specified VSI CUSUM chart, refer to <code>help(getAve)</code> and <code>help(getContl)</code>.</li>
+</ul>
+</div>
+<div id="additional-issues" class="section level2">
+<h2>Additional issues</h2>
+<ul>
+<li>The core computational algorithms are implemented using ‘Rcpp’ and ‘RcppArmadillo’.</li>
+<li>For user-friendly arguments checking, the package ‘ArgumentCheck’ is used.</li>
+<li>‘attrCUSUM’ provides functions for density, distribution, quantile and random generation for the zero inflated Poisson distribution. Refer to <code>help(zipois)</code></li>
+<li>‘attrCUSUM’ provides functions for density, distribution, quantile and random generation for the zero inflated binomial distribution. Refer to <code>help(zibinom)</code></li>
+</ul>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

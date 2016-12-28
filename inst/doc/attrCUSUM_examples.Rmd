@@ -1,0 +1,165 @@
+---
+title: "Tools for Attribute VSI CUSUM Charts"
+author: "Hanwool Kim"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Tools for Attribute VSI CUSUM Charts}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The package attrCUSUM has been developed to aid in 
+the statistical design of attribute VSI CUSUM chart. 
+It currently provides tools for monitoring of mean increase when the data are
+(zero inflated) Poisson/binomial distribution. These tools can be easily applied
+to other count processes and more complicated CUSUM control chart. 
+We leave these issues as our perpetual work.
+
+This vignette briefly illustrates some examples 
+for usage of functions in the package. 
+
+## CUSUM statistic
+Note that 
+the considered CUSUM statistic for monitoring of mean increase is defined as follows:
+
+${C}_{0} = {c}_{0},$
+
+${C}_{t} = \max \left( 0, {C}_{t-1}\right) + X_{t} - k, ~~ t \in \mathbf{N}$,
+
+wherein $X_{t}$ is a count process of interest, 
+$k$ is the reference value and $C_{0}$ is the initial state.
+
+## Getting ANSSs, ATSs and other informations
+First of all, the package should be attached.
+```{r attach}
+library(attrCUSUM)
+```
+
+Suppose that $X_{i}$ is distributed Poisson with mean $\lambda$. 
+The function `getAve_poisson` provides useful information 
+on design of upper one-sided CUSUM control chart when the data are Poisson. 
+
+Assume that we are interested in 
+the average number of sample to signal (ANSS) an out-of-condition for 
+CUSUM(k=5,h=8) with initial state 0 when the data are Poisson with mean 4 where 
+k and h are the reference value and 
+the (upper) control limit of CUSUM control chart respectively. 
+Then the ANSS of CUSUM(k=5, h=8) chart can be obtained as follows:
+```{r ANSS_pois_1}
+lambda <-  4  # mean of Poisson distribution
+k <- 5  # reference value 
+h <- 8  # control limit
+c.zero <- 0  # initial state
+res <- getAve_pois(lambda = lambda, refv = k, contl = h, c.zero = c.zero)
+res$ANSS
+```
+
+Next, Assume that we want to get the corresponding longer sampling time when 
+the predetermined shorter sampling interval is 0.1 and the warning limit is -1.
+The results can be obtained as follows:
+
+```{r ATS_pois_1}
+lambda <-  4  # mean of Poisson distribution
+k <- 5  # reference value 
+h <- 8  # control limit
+c.zero <- 0  # initial state
+warnl <- -1  # warning limit
+ds <- 0.1  # shorter sampling interval
+res1 <- getAve_pois(lambda = lambda, refv = k, contl = h, 
+                   c.zero = c.zero, warnl = warnl, ds = ds)
+dl <- res1$dl  # longer sampling interval
+dl
+res2 <- getAve_pois(lambda = lambda, refv = k, contl = h, 
+                   c.zero = c.zero, warnl = warnl, ds = ds, dl = dl)
+res2$ANSS
+res2$ATS
+```
+
+The following is an example of ATS profiles. 
+Evaluate `example(package = "attrCUSUM", "getAve_pois")` for more details.
+In plot, $\delta$ denotes mean shift in units of standard deviation.
+```{r ATS_profiles_pois_1, echo=FALSE, fig.align='center', fig.width=7, fig.height=5}
+lambda <-  4  # mean of Poisson distribution
+k <- 5  # reference value 
+h <- 8  # control limit
+c.zero <- 0  # initial state
+warnl <- -1  # warning limit
+std.lambda <- sqrt(lambda)
+dss <- c(1, 0.75, 0.5, 0.25, 0.1)  # shorter sampling intervals
+deltas <- seq(0, 2.0, 0.1)  # shift  
+for (ds in dss) {
+  dl <- getAve_pois(lambda = lambda, refv = k, contl = h,
+                    ds = ds, warnl = warnl)$dl
+  ds.text <- as.character(ds)
+  ats.text <- paste("ats", ds.text, sep = "_")
+  eval.text.1 <- paste(ats.text, " <- numeric(length(deltas))", sep = "")
+  eval.text.2 <- paste(ats.text, "[j] <- res$ATS", sep = "")
+  eval(parse(text = eval.text.1))
+  for (j in seq_along(deltas)) {  
+    res <- getAve_pois(lambda = lambda + (std.lambda * deltas[j]), 
+                       refv = k,contl = h, ds = ds, dl = dl, warnl = warnl)
+    eval(parse(text = eval.text.2))
+  }
+}
+plot(x = deltas, y = log10(ats_0.1), ylim = c(-0.5, log10(ats_1)[1]),
+     pch = 0, type = "o", main = "VSI Poisson CUSUM(5,8)", cex.main = 1.1,
+     sub = paste("w=", warnl, sep = ""), cex.sub = 1.1,
+     xlab = expression(delta), cex.lab = 1.1,
+     ylab = expression(paste(log[10], ATS)))
+lines(x = deltas, y = log10(ats_0.25), pch = 1, type = "o")
+lines(x = deltas, y = log10(ats_0.5), pch = 6, type = "o")
+lines(x = deltas, y = log10(ats_0.75), pch = 7, type = "o")
+lines(x = deltas, y = log10(ats_1), pch = 16, type = "o")
+legend(x = 1.4, y = 2.25, legend = paste("ds=", dss, sep = ""),
+       pch = c(16, 7, 6, 1, 0), cex = 0.9, bty = "n")
+
+```
+
+Note that the function `getAve_pois` provides other useful information 
+related to Markov chain approach. 
+Refer to `help(getAve)` for more details.
+```{r names_getAve_pois}
+names(res2)
+```
+
+## Getting suitable control limit
+As was before, Assume that $X_{i}$ is distributed Poisson with mean $\lambda$, 
+also we want to get suitable control limit when 
+the data are Poisson with mean 4 for that 
+the reference value is 5, the initial state is 0 and 
+the desired ANSS is near 200. 
+Then, the suitable control limit can be obtained as follows:
+```{r Contl_pois_1}
+lambda <-  4  # mean of Poisson distribution
+k <- 5  # reference value 
+c.zero <- 0  # initial state
+anss.target <- 200L  # desired anss
+getContl_pois(lambda = lambda, anss.target = anss.target, 
+              refv = k, c.zero = c.zero)
+
+```
+
+## Other count process
+Although we illustrated only the case that the data are Poisson,
+the package `attrCUSUM` also provides other count processes.
+
+* For (zero-inflated) binomial VSI CUSUM chart, 
+refer to `help(getAve_binomial)` and `help(getContl_binomial)`.
+* For (zero-inflated) Poisson VSI CUSUM chart, 
+refer to `help(getAve_Poisson)` and `help(getContl_Poisson)`.
+* For user-specified VSI CUSUM chart, 
+refer to `help(getAve)` and `help(getContl)`.
+
+## Additional issues
+* The core computational algorithms are implemented using 'Rcpp' and 'RcppArmadillo'.
+* For user-friendly arguments checking, the package 'ArgumentCheck' is used.
+* 'attrCUSUM' provides functions for density, distribution, quantile and
+    random generation for the zero inflated Poisson distribution. Refer to `help(zipois)`
+* 'attrCUSUM' provides functions for density, distribution, quantile and
+    random generation for the zero inflated binomial distribution. Refer to `help(zibinom)`
+
+
+
+
+
